@@ -2,6 +2,8 @@ package com.github.satoshun.example.main
 
 import android.view.View
 import android.widget.ImageView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -20,10 +22,11 @@ fun ImageView.load(
     .load(url)
   creator.builder()
 
-  getLifecycleCoroutineScope()!!.launch {
-    println("started")
-    load(creator)
-    println("finished")
+  val scope = getLifecycleCoroutineScope()
+  if (scope != null) {
+    scope.launch { load(creator) }
+  } else {
+    creator.into(this)
   }
 }
 
@@ -50,7 +53,33 @@ fun ImageView.clear() {
   Picasso.get().cancelRequest(this)
 }
 
-// TODO more smart way
-// get Fragment lifecycle
-internal fun View.getLifecycleCoroutineScope(): LifecycleCoroutineScope? =
-  (context as? LifecycleOwner)?.lifecycleScope
+internal fun View.getLifecycleCoroutineScope(): LifecycleCoroutineScope? {
+  val fragment = findAttachFragment()
+  if (fragment != null) {
+    return fragment.viewLifecycleOwner.lifecycleScope
+  }
+  return (context as? LifecycleOwner)?.lifecycleScope
+}
+
+private fun View.findAttachFragment(): Fragment? {
+  val activity = context as? FragmentActivity ?: return null
+  val allFragments = findAllFragments(activity.supportFragmentManager.fragments)
+
+  val root = activity.findViewById<View>(android.R.id.content)
+  var result: Fragment? = null
+  var current = this
+  while (current != root) {
+    result = allFragments.firstOrNull { it.view == current }
+    if (result != null) break
+    current = current.parent as? View ?: break
+  }
+  return result
+}
+
+private fun findAllFragments(
+  fragments: List<Fragment?>
+): List<Fragment> {
+  if (fragments.isEmpty()) return emptyList()
+  val fragments = fragments.filter { it?.view != null }.filterNotNull()
+  return fragments + findAllFragments(fragments.map { it.childFragmentManager.fragments }.flatten())
+}
