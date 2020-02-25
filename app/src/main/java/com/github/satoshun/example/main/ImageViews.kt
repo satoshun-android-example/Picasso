@@ -16,35 +16,38 @@ import kotlin.coroutines.resume
 
 fun ImageView.load(
   url: String,
+  callback: Callback = EmptyCallback,
   builder: RequestCreator.() -> Unit = {}
 ) {
-  val creator = Picasso.get()
-    .load(url)
+  val creator = Picasso.get().load(url)
   creator.builder()
 
   val scope = getLifecycleCoroutineScope()
   if (scope != null) {
-    scope.launch { load(creator) }
+    scope.launch { creator.load(this@load, callback) }
   } else {
-    creator.into(this)
+    creator.into(this, callback)
   }
 }
 
-private suspend fun ImageView.load(creator: RequestCreator) =
-  suspendCancellableCoroutine<Unit> { continuation ->
-    continuation.invokeOnCancellation {
-      println("cancel")
-      clear()
-    }
+private object EmptyCallback : Callback {
+  override fun onSuccess() {}
+  override fun onError(e: java.lang.Exception?) {}
+}
 
-    creator.into(this@load, object : Callback {
+private suspend fun RequestCreator.load(target: ImageView, callback: Callback) =
+  suspendCancellableCoroutine<Unit> { continuation ->
+    continuation.invokeOnCancellation { target.clear() }
+
+    into(target, object : Callback {
       override fun onSuccess() {
-        println("onSuccess")
         continuation.resume(Unit)
+        callback.onSuccess()
       }
 
       override fun onError(e: Exception?) {
         continuation.resume(Unit)
+        callback.onError(e)
       }
     })
   }
@@ -53,7 +56,7 @@ fun ImageView.clear() {
   Picasso.get().cancelRequest(this)
 }
 
-internal fun View.getLifecycleCoroutineScope(): LifecycleCoroutineScope? {
+private fun View.getLifecycleCoroutineScope(): LifecycleCoroutineScope? {
   val fragment = findAttachFragment()
   if (fragment != null) {
     return fragment.viewLifecycleOwner.lifecycleScope
@@ -76,10 +79,8 @@ private fun View.findAttachFragment(): Fragment? {
   return result
 }
 
-private fun findAllFragments(
-  fragments: List<Fragment?>
-): List<Fragment> {
-  if (fragments.isEmpty()) return emptyList()
-  val fragments = fragments.filter { it?.view != null }.filterNotNull()
+private fun findAllFragments(candidates: List<Fragment?>): List<Fragment> {
+  if (candidates.isEmpty()) return emptyList()
+  val fragments = candidates.filter { it?.view != null }.filterNotNull()
   return fragments + findAllFragments(fragments.map { it.childFragmentManager.fragments }.flatten())
 }
