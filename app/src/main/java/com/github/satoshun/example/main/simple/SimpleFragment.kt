@@ -14,6 +14,8 @@ class SimpleFragment : Fragment(R.layout.simple_frag) {
     super.onViewCreated(view, savedInstanceState)
     binding = SimpleFragBinding.bind(view)
 
-    binding.image.load()
+    binding.image1.load("https://pbs.twimg.com/profile_images/1227058593247064064/ssXXDIjO_400x400.jpg")
+
+    binding.image2.load("https://assets.razerzone.com/eedownloads/desktop-wallpapers/1920x1080_Byte.jpg")
   }
 }
