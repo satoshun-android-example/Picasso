@@ -1,7 +1,9 @@
 package com.github.satoshun.example.main
 
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleCoroutineScope
@@ -12,6 +14,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.File
 import kotlin.coroutines.resume
 
 fun ImageView.load(
@@ -21,13 +24,37 @@ fun ImageView.load(
 ) {
   val creator = Picasso.get().load(url)
   creator.builder()
+  creator.load(this, callback)
+}
 
-  val scope = getLifecycleCoroutineScope()
-  if (scope != null) {
-    scope.launch { creator.load(this@load, callback) }
-  } else {
-    creator.into(this, callback)
-  }
+fun ImageView.load(
+  uri: Uri,
+  callback: Callback = EmptyCallback,
+  builder: RequestCreator.() -> Unit = {}
+) {
+  val creator = Picasso.get().load(uri)
+  creator.builder()
+  creator.load(this, callback)
+}
+
+fun ImageView.load(
+  file: File,
+  callback: Callback = EmptyCallback,
+  builder: RequestCreator.() -> Unit = {}
+) {
+  val creator = Picasso.get().load(file)
+  creator.builder()
+  creator.load(this, callback)
+}
+
+fun ImageView.load(
+  @DrawableRes resourceId: Int,
+  callback: Callback = EmptyCallback,
+  builder: RequestCreator.() -> Unit = {}
+) {
+  val creator = Picasso.get().load(resourceId)
+  creator.builder()
+  creator.load(this, callback)
 }
 
 private object EmptyCallback : Callback {
@@ -35,7 +62,16 @@ private object EmptyCallback : Callback {
   override fun onError(e: java.lang.Exception?) {}
 }
 
-private suspend fun RequestCreator.load(target: ImageView, callback: Callback) =
+private fun RequestCreator.load(target: ImageView, callback: Callback) {
+  val scope = target.getLifecycleCoroutineScope()
+  if (scope != null) {
+    scope.launch { loadAwait(target, callback) }
+  } else {
+    into(target, callback)
+  }
+}
+
+private suspend fun RequestCreator.loadAwait(target: ImageView, callback: Callback) =
   suspendCancellableCoroutine<Unit> { continuation ->
     continuation.invokeOnCancellation { target.clear() }
 
