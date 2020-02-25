@@ -50,19 +50,10 @@ dependencies {
   implementation VIEWMODEL
   implementation LIFECYCLE_RUNTIME
 
-  implementation STORE
-
-  implementation GLIDE
-
-  implementation WEBKIT
+  implementation PICASSO
 
   implementation COROUTINE
   implementation UI_COROUTINE
-
-  implementation GROUPIE
-  implementation GROUPIE_DATABINDING
-
-  implementation INSETTER
 
   implementation NAVIGATION
   implementation NAVIGATION_FRAGMENT
