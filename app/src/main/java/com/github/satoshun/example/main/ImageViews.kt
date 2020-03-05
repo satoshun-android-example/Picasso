@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
@@ -93,9 +94,11 @@ fun ImageView.clear() {
 }
 
 private fun View.getLifecycleCoroutineScope(): LifecycleCoroutineScope? {
-  val fragment = findAttachFragment()
-  if (fragment != null) {
-    return fragment.viewLifecycleOwner.lifecycleScope
+  findViewTreeLifecycleOwner()?.let {
+    return it.lifecycleScope
+  }
+  findAttachFragment()?.let {
+    return it.viewLifecycleOwner.lifecycleScope
   }
   return (context as? LifecycleOwner)?.lifecycleScope
 }

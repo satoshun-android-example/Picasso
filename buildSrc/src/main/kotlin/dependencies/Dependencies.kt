@@ -4,7 +4,7 @@ const val COMPILE_SDK = 29
 const val MIN_SDK = 21
 const val TARGET_SDK = 29
 
-private const val VKOTLIN = "1.3.61"
+private const val VKOTLIN = "1.3.70"
 private const val VNAVIGATION = "2.2.0"
 
 const val ANDROID_PLUGIN = "com.android.tools.build:gradle:3.6.1"
@@ -18,11 +18,11 @@ const val KOTLIN = "org.jetbrains.kotlin:kotlin-stdlib:$VKOTLIN"
 const val COROUTINE = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$VCOUROUTINE"
 const val UI_COROUTINE = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$VCOUROUTINE"
 
-const val KTX = "androidx.core:core-ktx:1.1.0"
-const val ACTIVITYX = "androidx.activity:activity-ktx:1.1.0"
-const val FRAGMENTX = "androidx.fragment:fragment-ktx:1.2.0"
+const val KTX = "androidx.core:core-ktx:1.3.0-alpha01"
+const val ACTIVITYX = "androidx.activity:activity-ktx:1.2.0-alpha01"
+const val FRAGMENTX = "androidx.fragment:fragment-ktx:1.3.0-alpha01"
 
-const val APPCOMPAT = "androidx.appcompat:appcompat:1.1.0"
+const val APPCOMPAT = "androidx.appcompat:appcompat:1.2.0-alpha03"
 const val RECYCLERVIEW = "androidx.recyclerview:recyclerview:1.0.0"
 const val CONSTRAINTLAYOUT = "androidx.constraintlayout:constraintlayout:2.0.0-beta3"
 const val CARDVIEW = "androidx.cardview:cardview:1.0.0"
